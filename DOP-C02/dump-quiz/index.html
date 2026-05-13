@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ITE302c Mock Test — CertNexus CEET</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d0e10;
+        --panel: #15171a;
+        --panel-2: #1c1f24;
+        --border: #2a2e35;
+        --text: #e5e7eb;
+        --muted: #8b8f97;
+        --accent: #a3e635;
+        --accent-dim: #65a30d;
+        --danger: #f87171;
+        --warn: #fbbf24;
+        --ok: #4ade80;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: "JetBrains Mono", monospace;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.55;
+        font-size: 14px;
+        background-image:
+          radial-gradient(
+            circle at 20% 0%,
+            rgba(163, 230, 53, 0.04),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 100% 100%,
+            rgba(163, 230, 53, 0.03),
+            transparent 50%
+          );
+        background-attachment: fixed;
+      }
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 32px 24px 80px;
+      }
+
+      /* HEADER */
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 20px;
+        margin-bottom: 32px;
+      }
+      .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .brand h1 {
+        font-family: "Fraunces", serif;
+        font-weight: 800;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+      }
+      .brand .tag {
+        font-size: 11px;
+        color: var(--accent);
+        border: 1px solid var(--accent-dim);
+        padding: 2px 8px;
+        border-radius: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .brand .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      /* SETUP SCREEN */
+      .setup-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 32px;
+      }
+      .setup-card h2 {
+        font-family: "Fraunces", serif;
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .setup-card .lead {
+        color: var(--muted);
+        margin-bottom: 28px;
+      }
+
+      .mode-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .mode-card {
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        padding: 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        position: relative;
+      }
+      .mode-card:hover {
+        border-color: var(--accent-dim);
+        transform: translateY(-1px);
+      }
+      .mode-card.selected {
+        border-color: var(--accent);
+        background: linear-gradient(
+          135deg,
+          rgba(163, 230, 53, 0.08),
+          transparent
+        );
+      }
+      .mode-card.selected::after {
+        content: "✓";
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .mode-card h3 {
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: var(--accent);
+      }
+      .mode-card p {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .row {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .row label {
+        font-size: 12px;
+        color: var(--muted);
+        min-width: 110px;
+      }
+      .row input[type="number"] {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-family: inherit;
+        width: 90px;
+      }
+      .row input[type="number"]:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .row .hint {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #0d0e10;
+        border: none;
+        padding: 12px 24px;
+        font-family: inherit;
+        font-weight: 700;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.15s;
+      }
+      button.primary:hover {
+        background: #bef264;
+        transform: translateY(-1px);
+      }
+      button.secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 10px 18px;
+        font-family: inherit;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      button.secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* TEST SCREEN */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 12px 18px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        position: sticky;
+        top: 12px;
+        z-index: 10;
+        backdrop-filter: blur(8px);
+        background: rgba(21, 23, 26, 0.92);
+      }
+      .top-bar .progress-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .top-bar .timer {
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .top-bar .timer.warn {
+        color: var(--warn);
+      }
+      .top-bar .timer.danger {
+        color: var(--danger);
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .progress-bar {
+        width: 180px;
+        height: 6px;
+        background: var(--panel-2);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-bar .fill {
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.3s ease;
+      }
+
+      .question-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 28px;
+        margin-bottom: 20px;
+      }
+      .q-num {
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .q-num .multi {
+        background: var(--warn);
+        color: #0d0e10;
+        padding: 2px 8px;
+        border-radius: 3px;
+        margin-left: 8px;
+        font-weight: 700;
+      }
+      .q-text {
+        font-family: "Fraunces", serif;
+        font-size: 18px;
+        line-height: 1.5;
+        margin-bottom: 22px;
+        font-weight: 500;
+      }
+
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .option {
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        padding: 14px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.12s ease;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .option:hover {
+        border-color: var(--accent-dim);
+      }
+      .option .letter {
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 22px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .option.selected {
+        border-color: var(--accent);
+        background: linear-gradient(
+          135deg,
+          rgba(163, 230, 53, 0.1),
+          transparent
+        );
+      }
+      .option.correct {
+        border-color: var(--ok);
+        background: rgba(74, 222, 128, 0.08);
+      }
+      .option.correct .letter {
+        color: var(--ok);
+      }
+      .option.wrong {
+        border-color: var(--danger);
+        background: rgba(248, 113, 113, 0.08);
+      }
+      .option.wrong .letter {
+        color: var(--danger);
+      }
+      .option.disabled {
+        cursor: default;
+        opacity: 0.85;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .feedback {
+        margin-top: 16px;
+        padding: 12px 16px;
+        border-left: 3px solid var(--ok);
+        background: rgba(74, 222, 128, 0.06);
+        font-size: 13px;
+        border-radius: 0 4px 4px 0;
+      }
+      .feedback.wrong {
+        border-color: var(--danger);
+        background: rgba(248, 113, 113, 0.06);
+      }
+
+      .note-box {
+        margin-top: 12px;
+        padding: 12px 16px;
+        border-left: 3px solid var(--accent);
+        background: rgba(163, 230, 53, 0.05);
+        font-size: 13px;
+        line-height: 1.55;
+        border-radius: 0 4px 4px 0;
+        color: var(--text);
+      }
+      .note-box .note-label {
+        display: inline-block;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-right: 8px;
+        font-weight: 600;
+      }
+
+      /* RESULTS */
+      .result-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 36px;
+        text-align: center;
+      }
+      .score-big {
+        font-family: "Fraunces", serif;
+        font-size: 72px;
+        font-weight: 800;
+        line-height: 1;
+        margin: 16px 0;
+        letter-spacing: -0.03em;
+      }
+      .score-big.pass {
+        color: var(--ok);
+      }
+      .score-big.fail {
+        color: var(--danger);
+      }
+      .score-percent {
+        font-size: 18px;
+        color: var(--muted);
+        margin-bottom: 28px;
+      }
+      .verdict {
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      .verdict.pass {
+        color: var(--ok);
+      }
+      .verdict.fail {
+        color: var(--warn);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin: 28px 0;
+        text-align: left;
+      }
+      .stat {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 6px;
+      }
+      .stat .label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+      }
+      .stat .value {
+        font-size: 22px;
+        font-weight: 700;
+        font-family: "Fraunces", serif;
+      }
+
+      .review-list {
+        text-align: left;
+        margin-top: 28px;
+      }
+      .review-list h3 {
+        font-family: "Fraunces", serif;
+        font-size: 18px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .review-item {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--danger);
+        padding: 14px 16px;
+        border-radius: 0 6px 6px 0;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+      .review-item.skipped {
+        border-left-color: var(--muted);
+      }
+      .review-item .q {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--text);
+      }
+      .review-item .ans {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .review-item .ans .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .review-item .ans .bad {
+        color: var(--danger);
+        font-weight: 700;
+      }
+      .review-item .ans .skip {
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* MOBILE */
+      @media (max-width: 640px) {
+        .container {
+          padding: 16px 12px 60px;
+        }
+        .mode-grid {
+          grid-template-columns: 1fr;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .progress-bar {
+          width: 100px;
+        }
+        .q-text {
+          font-size: 16px;
+        }
+        .top-bar {
+          flex-direction: column;
+          gap: 10px;
+          align-items: stretch;
+        }
+      }
+
+      ::selection {
+        background: var(--accent);
+        color: #0d0e10;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="brand">
+          <h1>ITE302c</h1>
+          <span class="tag">Mock Test</span>
+        </div>
+        <div class="sub">
+          CertNexus Certified Ethical Emerging Technologist · 339 questions in
+          bank
+        </div>
+      </header>
+
+      <!-- ============ SETUP ============ -->
+      <section id="setup">
+        <div class="setup-card">
+          <h2>Test Configuration</h2>
+          <p class="lead">Pick mode → set count → simulate.</p>
+
+          <div class="mode-grid">
+            <div class="mode-card selected" data-mode="exam">
+              <h3>EXAM MODE</h3>
+              <p>
+                Real test simulation. Timer on. No feedback during. Review at
+                end. <b>Recommended for D-1.</b>
+              </p>
+            </div>
+            <div class="mode-card" data-mode="study">
+              <h3>STUDY MODE</h3>
+              <p>
+                Instant feedback after each answer. No timer. Best for first
+                pass through dump.
+              </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="qcount">Questions:</label>
+            <input type="number" id="qcount" value="60" min="10" max="339" />
+            <span class="hint">10–339 (real exam = 60)</span>
+          </div>
+          <div class="row">
+            <label for="timer">Time limit:</label>
+            <input type="number" id="timer" value="60" min="5" max="180" />
+            <span class="hint">minutes (exam mode only)</span>
+          </div>
+          <div class="row">
+            <label for="passmark">Pass mark:</label>
+            <input type="number" id="passmark" value="70" min="0" max="100" />
+            <span class="hint">% (target: 70)</span>
+          </div>
+
+          <button class="primary" id="start-btn">Start Test →</button>
+        </div>
+      </section>
+
+      <!-- ============ TEST ============ -->
+      <section id="test" class="hidden">
+        <div class="top-bar">
+          <div class="progress-wrap">
+            <span id="qcounter">Q 1 / 60</span>
+            <div class="progress-bar">
+              <div class="fill" id="progress-fill"></div>
+            </div>
+          </div>
+          <div class="timer" id="timer-display">--:--</div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-num" id="q-num">
+            QUESTION 1<span class="multi hidden" id="multi-tag"
+              >SELECT MULTIPLE</span
+            >
+          </div>
+          <div class="q-text" id="q-text"></div>
+          <div class="options" id="options"></div>
+          <div class="feedback hidden" id="feedback"></div>
+          <div class="note-box hidden" id="note-box"></div>
+        </div>
+
+        <div class="nav">
+          <button class="secondary" id="prev-btn">← Prev</button>
+          <div style="display: flex; gap: 10px">
+            <button class="secondary" id="submit-btn">Submit Test</button>
+            <button class="primary" id="next-btn">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS ============ -->
+      <section id="results" class="hidden">
+        <div class="result-card">
+          <div
+            style="
+              font-size: 11px;
+              color: var(--muted);
+              letter-spacing: 0.15em;
+              text-transform: uppercase;
+            "
+          >
+            Final Score
+          </div>
+          <div class="score-big" id="score-big">0/0</div>
+          <div class="score-percent" id="score-percent">0%</div>
+          <div class="verdict" id="verdict">—</div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="label">Correct</div>
+              <div class="value" id="stat-correct">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Wrong</div>
+              <div class="value" id="stat-wrong">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Skipped</div>
+              <div class="value" id="stat-skipped">0</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: center">
+            <button class="primary" id="retry-btn">Retry</button>
+            <button class="secondary" id="restart-btn">New Config</button>
+          </div>
+
+          <div class="review-list" id="review-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      let QUESTIONS = [];
+      const QUESTIONS_URL = "quizlet.json";
+
+      const state = {
+        mode: "exam",
+        pool: [],
+        currentIdx: 0,
+        answers: {}, // idx -> {selected:[...], submitted:bool}
+        timerSec: 0,
+        timerId: null,
+        passmark: 70,
+      };
+
+      // SETUP
+      document.querySelectorAll(".mode-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          document
+            .querySelectorAll(".mode-card")
+            .forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+          state.mode = card.dataset.mode;
+        });
+      });
+
+      const startBtn = document.getElementById("start-btn");
+      startBtn.addEventListener("click", startTest);
+      startBtn.disabled = true;
+      startBtn.textContent = "Loading questions…";
+
+      fetch(QUESTIONS_URL)
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
+        .then((data) => {
+          QUESTIONS = data;
+          startBtn.disabled = false;
+          startBtn.textContent = "Start Test →";
+          const qcountEl = document.getElementById("qcount");
+          qcountEl.max = QUESTIONS.length;
+          qcountEl.nextElementSibling.textContent = `10–${QUESTIONS.length} (real exam = 60)`;
+          document.querySelector("header .sub").textContent =
+            `CertNexus Certified Ethical Emerging Technologist · ${QUESTIONS.length} questions in bank`;
+        })
+        .catch((err) => {
+          startBtn.textContent = "Failed to load quizlet.json";
+          alert(
+            `Could not load ${QUESTIONS_URL}: ${err.message}\n\nNote: opening index.html via file:// blocks fetch. Serve via HTTP (e.g. \`python3 -m http.server\`) or use GitHub Pages.`,
+          );
+        });
+
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function startTest() {
+        const count =
+          parseInt(document.getElementById("qcount").value, 10) || 50;
+        const timeLimit =
+          parseInt(document.getElementById("timer").value, 10) || 60;
+        state.passmark =
+          parseInt(document.getElementById("passmark").value, 10) || 70;
+        state.pool = shuffle(QUESTIONS).slice(
+          0,
+          Math.min(count, QUESTIONS.length),
+        );
+        state.currentIdx = 0;
+        state.answers = {};
+
+        document.getElementById("setup").classList.add("hidden");
+        document.getElementById("results").classList.add("hidden");
+        document.getElementById("test").classList.remove("hidden");
+
+        if (state.mode === "exam") {
+          state.timerSec = timeLimit * 60;
+          if (state.timerId) clearInterval(state.timerId);
+          state.timerId = setInterval(tickTimer, 1000);
+          updateTimerDisplay();
+        } else {
+          document.getElementById("timer-display").textContent = "STUDY";
+          document
+            .getElementById("timer-display")
+            .classList.remove("warn", "danger");
+        }
+        renderQuestion();
+      }
+
+      function tickTimer() {
+        state.timerSec--;
+        if (state.timerSec <= 0) {
+          state.timerSec = 0;
+          clearInterval(state.timerId);
+          submitTest();
+          return;
+        }
+        updateTimerDisplay();
+      }
+
+      function updateTimerDisplay() {
+        const m = Math.floor(state.timerSec / 60);
+        const s = state.timerSec % 60;
+        const el = document.getElementById("timer-display");
+        el.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        el.classList.toggle(
+          "warn",
+          state.timerSec <= 600 && state.timerSec > 120,
+        );
+        el.classList.toggle("danger", state.timerSec <= 120);
+      }
+
+      function renderQuestion() {
+        const idx = state.currentIdx;
+        const q = state.pool[idx];
+        const isMulti = q.answer.length > 1;
+        const ans = state.answers[idx] || { selected: [], submitted: false };
+
+        document.getElementById("qcounter").textContent =
+          `Q ${idx + 1} / ${state.pool.length}`;
+        document.getElementById("progress-fill").style.width =
+          `${((idx + 1) / state.pool.length) * 100}%`;
+        document.getElementById("q-num").firstChild.textContent =
+          `QUESTION ${idx + 1} `;
+        document
+          .getElementById("multi-tag")
+          .classList.toggle("hidden", !isMulti);
+        document.getElementById("q-text").textContent = q.question;
+
+        const optsEl = document.getElementById("options");
+        optsEl.innerHTML = "";
+        Object.entries(q.options).forEach(([letter, text]) => {
+          const div = document.createElement("div");
+          div.className = "option";
+          div.dataset.letter = letter;
+          div.innerHTML = `<span class="letter">${letter}.</span><span>${escapeHtml(text)}</span>`;
+
+          if (ans.submitted) {
+            div.classList.add("disabled");
+            const isCorrect = q.answer.includes(letter);
+            const wasSelected = ans.selected.includes(letter);
+            if (isCorrect) div.classList.add("correct");
+            else if (wasSelected) div.classList.add("wrong");
+          } else {
+            if (ans.selected.includes(letter)) div.classList.add("selected");
+            div.addEventListener("click", () => toggleSelect(letter, isMulti));
+          }
+          optsEl.appendChild(div);
+        });
+
+        // Feedback (study mode only, after submit)
+        const fb = document.getElementById("feedback");
+        if (state.mode === "study" && ans.submitted) {
+          const correct = arrEq(
+            ans.selected.slice().sort(),
+            q.answer.split("").sort(),
+          );
+          fb.classList.remove("hidden", "wrong");
+          if (correct) {
+            fb.textContent = `✓ Correct. Answer: ${q.answer}`;
+          } else {
+            fb.classList.add("wrong");
+            fb.textContent = `✗ Wrong. Correct answer: ${q.answer}. You picked: ${ans.selected.join("") || "(none)"}.`;
+          }
+        } else {
+          fb.classList.add("hidden");
+        }
+
+        // Note box (study mode only, after submit, only if note exists)
+        const noteEl = document.getElementById("note-box");
+        if (state.mode === "study" && ans.submitted && q.note) {
+          const safe = escapeHtml(q.note).replace(/\n/g, "<br>");
+          noteEl.classList.remove("hidden");
+          noteEl.innerHTML = `<span class="note-label">📌 Mẹo nhớ</span>${safe}`;
+        } else {
+          noteEl.classList.add("hidden");
+        }
+
+        document.getElementById("prev-btn").disabled = idx === 0;
+        const nextBtn = document.getElementById("next-btn");
+        if (idx === state.pool.length - 1) {
+          nextBtn.textContent = "Finish →";
+        } else {
+          nextBtn.textContent = "Next →";
+        }
+
+        // Study mode: if not yet submitted, "Next" acts as Check Answer
+        if (state.mode === "study" && !ans.submitted) {
+          nextBtn.textContent = "Check Answer";
+        }
+      }
+
+      function toggleSelect(letter, isMulti) {
+        const idx = state.currentIdx;
+        if (!state.answers[idx])
+          state.answers[idx] = { selected: [], submitted: false };
+        const a = state.answers[idx];
+        if (a.submitted) return;
+
+        if (isMulti) {
+          if (a.selected.includes(letter)) {
+            a.selected = a.selected.filter((l) => l !== letter);
+          } else {
+            a.selected.push(letter);
+          }
+        } else {
+          a.selected = [letter];
+        }
+        renderQuestion();
+      }
+
+      function arrEq(a, b) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+        return true;
+      }
+
+      document.getElementById("next-btn").addEventListener("click", () => {
+        const idx = state.currentIdx;
+        const ans = state.answers[idx] || { selected: [], submitted: false };
+
+        // Study mode: first click = check answer, second click = move on
+        if (state.mode === "study" && !ans.submitted) {
+          if (ans.selected.length === 0) return; // need to pick something
+          ans.submitted = true;
+          state.answers[idx] = ans;
+          renderQuestion();
+          return;
+        }
+
+        if (state.currentIdx >= state.pool.length - 1) {
+          submitTest();
+        } else {
+          state.currentIdx++;
+          renderQuestion();
+        }
+      });
+
+      document.getElementById("prev-btn").addEventListener("click", () => {
+        if (state.currentIdx > 0) {
+          state.currentIdx--;
+          renderQuestion();
+        }
+      });
+
+      document.getElementById("submit-btn").addEventListener("click", () => {
+        if (
+          confirm(
+            "Submit test now? Unanswered questions will be marked skipped.",
+          )
+        ) {
+          submitTest();
+        }
+      });
+
+      function submitTest() {
+        if (state.timerId) clearInterval(state.timerId);
+
+        let correct = 0,
+          wrong = 0,
+          skipped = 0;
+        const reviewItems = [];
+
+        state.pool.forEach((q, i) => {
+          const a = state.answers[i];
+          const correctAns = q.answer.split("").sort();
+          if (!a || a.selected.length === 0) {
+            skipped++;
+            reviewItems.push({ q, picked: "", status: "skipped" });
+          } else {
+            const picked = a.selected.slice().sort();
+            if (arrEq(picked, correctAns)) {
+              correct++;
+            } else {
+              wrong++;
+              reviewItems.push({
+                q,
+                picked: a.selected.join(""),
+                status: "wrong",
+              });
+            }
+          }
+        });
+
+        const total = state.pool.length;
+        const pct = Math.round((correct / total) * 100);
+        const passed = pct >= state.passmark;
+
+        document.getElementById("test").classList.add("hidden");
+        document.getElementById("results").classList.remove("hidden");
+
+        const scoreEl = document.getElementById("score-big");
+        scoreEl.textContent = `${correct}/${total}`;
+        scoreEl.classList.toggle("pass", passed);
+        scoreEl.classList.toggle("fail", !passed);
+
+        document.getElementById("score-percent").textContent = `${pct}%`;
+        const verdictEl = document.getElementById("verdict");
+        verdictEl.classList.toggle("pass", passed);
+        verdictEl.classList.toggle("fail", !passed);
+        verdictEl.textContent = passed
+          ? `✓ PASS — above ${state.passmark}% threshold. Bạn ready rồi.`
+          : `✗ Below ${state.passmark}%. Review câu sai bên dưới và retry.`;
+
+        document.getElementById("stat-correct").textContent = correct;
+        document.getElementById("stat-wrong").textContent = wrong;
+        document.getElementById("stat-skipped").textContent = skipped;
+
+        const reviewEl = document.getElementById("review-list");
+        if (reviewItems.length === 0) {
+          reviewEl.innerHTML = "<h3>All correct! 🎯</h3>";
+        } else {
+          let html = `<h3>Review — ${reviewItems.length} to revisit</h3>`;
+          reviewItems.forEach((r, i) => {
+            const cls = r.status === "skipped" ? " skipped" : "";
+            const pickedHtml =
+              r.status === "skipped"
+                ? `<span class="skip">(skipped)</span>`
+                : `<span class="bad">${r.picked}</span>`;
+            html += `<div class="review-item${cls}">
+        <div class="q">${escapeHtml(r.q.question)}</div>
+        <div class="ans">Correct: <span class="ok">${r.q.answer}</span> · Your answer: ${pickedHtml}</div>
+      </div>`;
+          });
+          reviewEl.innerHTML = html;
+        }
+      }
+
+      document.getElementById("retry-btn").addEventListener("click", startTest);
+      document.getElementById("restart-btn").addEventListener("click", () => {
+        document.getElementById("results").classList.add("hidden");
+        document.getElementById("setup").classList.remove("hidden");
+      });
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+    </script>
+  </body>
+</html>

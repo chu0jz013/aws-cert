@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DOP-C02 Mock Exam</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- ===== START SCREEN ===== -->
+      <section id="start-screen" class="screen active">
+        <div class="card">
+          <h1>AWS Certified DevOps Engineer</h1>
+          <h2>Professional (DOP-C02) — Mock Exam</h2>
+
+          <div class="exam-info">
+            <div class="info-item">
+              <span class="info-label">Số câu hỏi</span>
+              <span class="info-value" id="info-questions">75</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Thời gian</span>
+              <span class="info-value" id="info-duration">180 phút</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Điểm pass</span>
+              <span class="info-value" id="info-pass">75%</span>
+            </div>
+          </div>
+
+          <div class="domain-list">
+            <h3>Phân bổ theo domain</h3>
+            <ul id="domain-summary"></ul>
+          </div>
+
+          <div class="mode-selector">
+            <h3>Chế độ</h3>
+            <label class="mode-option">
+              <input type="radio" name="mode" value="exam" checked />
+              <span><strong>Exam</strong> — random theo trọng số / 180 phút</span>
+            </label>
+            <label class="mode-option">
+              <input type="radio" name="mode" value="practice" />
+              <span><strong>Practice</strong> — làm toàn bộ bank đã filter, không giới hạn thời gian</span>
+            </label>
+          </div>
+
+          <div class="domain-filter">
+            <h3>Domain (mặc định tất cả)</h3>
+            <div class="filter-actions">
+              <button type="button" id="btn-select-all" class="btn-secondary btn-mini">Chọn tất cả</button>
+              <button type="button" id="btn-deselect-all" class="btn-secondary btn-mini">Bỏ chọn</button>
+            </div>
+            <div id="domain-checkboxes"></div>
+          </div>
+
+          <div class="instructions">
+            <h3>Hướng dẫn</h3>
+            <ul>
+              <li>
+                Bài thi gồm câu hỏi single-answer (radio) và multiple-answer
+                (checkbox).
+              </li>
+              <li>
+                Có thể quay lại câu trước bằng nút <strong>Previous</strong>.
+              </li>
+              <li>
+                Timer chạy ngược, dưới 10 phút sẽ chuyển
+                <span class="text-warn">màu đỏ</span>.
+              </li>
+              <li>Khi hết giờ, bài sẽ <strong>tự động nộp</strong>.</li>
+              <li>
+                Bạn có thể nộp bài bất cứ lúc nào bằng nút
+                <strong>Submit</strong>.
+              </li>
+              <li>
+                Mỗi câu có link <strong>📖 AWS Docs</strong> ở màn hình kết quả để đào sâu thêm.
+              </li>
+            </ul>
+          </div>
+
+          <button id="btn-start" class="btn-primary">Bắt đầu thi</button>
+          <p id="load-error" class="text-warn" hidden></p>
+        </div>
+      </section>
+
+      <!-- ===== QUIZ SCREEN ===== -->
+      <section id="quiz-screen" class="screen">
+        <header class="quiz-header">
+          <div class="header-left">
+            <span class="progress-label"
+              >Câu <span id="current-num">1</span> /
+              <span id="total-num">75</span></span
+            >
+            <progress id="progress-bar" max="75" value="1"></progress>
+          </div>
+          <div class="header-right">
+            <span class="timer-label">Thời gian còn:</span>
+            <span id="timer" class="timer-value">03:00:00</span>
+          </div>
+        </header>
+
+        <main class="quiz-body">
+          <div class="question-container">
+            <div class="question-meta">
+              <span id="domain-tag" class="domain-tag"
+                >Domain 1 · SDLC Automation</span
+              >
+              <span id="type-tag" class="type-tag">Single answer</span>
+            </div>
+            <p id="question-text" class="question-text"></p>
+            <form id="options-form" class="options-form"></form>
+          </div>
+        </main>
+
+        <footer class="quiz-footer">
+          <button id="btn-prev" class="btn-secondary">‹ Previous</button>
+          <button id="btn-submit" class="btn-warn">Submit</button>
+          <button id="btn-next" class="btn-primary">Next ›</button>
+        </footer>
+      </section>
+
+      <!-- ===== RESULT SCREEN ===== -->
+      <section id="result-screen" class="screen">
+        <div class="card">
+          <h1>Kết quả</h1>
+
+          <div id="result-summary" class="result-summary">
+            <div class="score-circle" id="score-circle">
+              <span id="score-percent">0%</span>
+              <span id="score-fraction">0 / 75</span>
+            </div>
+            <div class="badge-container">
+              <span id="result-badge" class="badge"></span>
+              <p id="result-reason" class="result-reason"></p>
+            </div>
+          </div>
+
+          <div class="domain-stats">
+            <h3>Thống kê theo domain</h3>
+            <div id="domain-bars"></div>
+          </div>
+
+          <div class="review-section">
+            <h3>Xem lại từng câu</h3>
+            <div class="review-filter">
+              <button class="filter-btn active" data-filter="all">
+                Tất cả
+              </button>
+              <button class="filter-btn" data-filter="wrong">
+                Chỉ câu sai
+              </button>
+              <button class="filter-btn" data-filter="correct">
+                Chỉ câu đúng
+              </button>
+            </div>
+            <div id="review-list"></div>
+          </div>
+
+          <button id="btn-restart" class="btn-primary">Làm lại</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
