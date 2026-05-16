@@ -2,7 +2,8 @@
 
 App quiz HTML để giả lập kỳ thi **AWS Certified DevOps Engineer - Professional (DOP-C02)**.
 
-- **Bank 225 câu** scenario-based, phân bổ theo trọng số chính thức 6 domain
+- **Bank 450 câu** scenario-based, phân bổ theo trọng số chính thức 6 domain
+- **Style câu hỏi**: scenario dài 2 đoạn, nhiều ràng buộc vận hành/bảo mật, distractor AWS plausible, không copy exam dump
 - **2 chế độ**: Exam (random 75 câu / 180 phút) hoặc Practice (toàn bộ bank, không timer)
 - **Filter theo domain** để practice riêng từng domain yếu
 - **Reference link** AWS docs cho mỗi câu ở màn hình kết quả
@@ -14,7 +15,7 @@ quiz-app/
 ├── index.html          # UI: 3 màn hình start / quiz / result
 ├── style.css           # Styling (AWS color scheme, responsive)
 ├── app.js              # Logic: timer, navigation, scoring, filter
-├── questions.json      # Bank 225 câu hỏi
+├── questions.json      # Bank 450 câu hỏi
 └── README.md           # File này
 ```
 
@@ -25,7 +26,7 @@ App dùng `fetch('questions.json')` nên **PHẢI serve qua HTTP** (mở trực 
 ### Cách đơn giản nhất — Python (có sẵn trên macOS)
 
 ```bash
-python3 -m http.server 8000 --directory /Users/hai.kn/Desktop/docs/self/DOP-C02/quiz-app
+python3 -m http.server 8000 --directory ./
 ```
 
 Mở trình duyệt: <http://localhost:8000>
@@ -33,7 +34,7 @@ Mở trình duyệt: <http://localhost:8000>
 ### Hoặc dùng Node.js
 
 ```bash
-cd /Users/hai.kn/Desktop/docs/self/DOP-C02/quiz-app && npx serve .
+npx serve .
 ```
 
 ### Hoặc VS Code Live Server extension
@@ -57,17 +58,17 @@ Mở `index.html` → chuột phải → "Open with Live Server".
 | **Review** | Liệt kê câu với highlight đúng/sai + giải thích + **link AWS Docs**; filter All / Wrong / Correct |
 | **Responsive** | Layout adapt cho mobile |
 
-## Phân bổ bank 225 câu
+## Phân bổ bank 450 câu
 
 | Domain | Trọng số | Số câu trong bank | Số câu/session (Exam) |
 |--------|----------|-------------------|------------------------|
-| D1 · SDLC Automation | 22% | 51 | 17 |
-| D2 · Configuration Management & IaC | 17% | 39 | 13 |
-| D3 · Resilient Cloud Solutions | 15% | 33 | 11 |
-| D4 · Monitoring & Logging | 15% | 33 | 11 |
-| D5 · Incident & Event Response | 14% | 33 | 11 |
-| D6 · Security & Compliance | 17% | 36 | 12 |
-| **Tổng** | **100%** | **225** | **75** |
+| D1 · SDLC Automation | 22% | 102 | 17 |
+| D2 · Configuration Management & IaC | 17% | 78 | 13 |
+| D3 · Resilient Cloud Solutions | 15% | 66 | 11 |
+| D4 · Monitoring & Logging | 15% | 66 | 11 |
+| D5 · Incident & Event Response | 14% | 66 | 11 |
+| D6 · Security & Compliance | 17% | 72 | 12 |
+| **Tổng** | **100%** | **450** | **75** |
 
 Tỷ lệ giữ đúng trọng số AWS Exam Guide chính thức.
 
@@ -77,7 +78,7 @@ Mở `questions.json` và thêm câu mới theo schema:
 
 ```json
 {
-  "id": 226,
+  "id": 451,
   "domain": "SDLC Automation",
   "domainCode": "D1",
   "type": "single",
@@ -98,14 +99,15 @@ Lưu ý:
 - `domainCode` phải khớp 1 trong các code trong `domains` (D1-D6)
 - `type` chỉ có 2 giá trị: `"single"` hoặc `"multiple"`
 - `answer` luôn là array, kể cả single-answer
+- Câu `"multiple"` nên có tối thiểu 5 options và tối thiểu 2 đáp án đúng
 - `reference` là URL trỏ tới AWS docs liên quan (hiển thị ở Review screen)
 - Nếu thêm câu mới, cập nhật `count` ở `domains` để summary chính xác
 
 ## Tips
 
 - Kỳ thi thật: 75 câu / 180 phút, pass mark ~750/1000 (~75%)
-- App giả lập đúng format: random 75 câu từ bank 225, giữ phân bổ theo trọng số
-- Bank 225 câu đủ để làm 3+ lần Exam mode với ít trùng câu
+- App giả lập đúng format: random 75 câu từ bank 450, giữ phân bổ theo trọng số
+- Bank 450 câu đủ để làm khoảng 6 lần Exam mode với ít trùng câu
 - Practice mode: luyện theo domain yếu (vd: tick chỉ D5 → làm 33 câu D5 không timer)
 - Multiple-answer: phải đúng **TẤT CẢ** đáp án, không có partial credit (giống kỳ thi thật)
 

@@ -1,0 +1,568 @@
+[
+  {
+    "id": 226,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A DevOps team manages a CodePipeline pipeline that deploys a microservice to three AWS accounts: dev, staging, and prod. Each deployment uses CloudFormation. The team wants the prod deployment to require human approval, and they want approvers to be notified via Slack with a link to the CloudFormation change set summary. Which solution requires the LEAST custom code?",
+    "options": [
+      { "key": "A", "text": "Add a CloudFormation 'Create Change Set' action followed by a Manual Approval action in the prod stage. Configure the Manual Approval action to publish to an SNS topic subscribed to AWS Chatbot, which posts to Slack." },
+      { "key": "B", "text": "Add a Lambda invoke action that creates a change set and posts a Slack message via webhook. Use a second Lambda to poll for approval before executing the change set." },
+      { "key": "C", "text": "Configure CodePipeline to send EventBridge events for stage state changes to a Lambda function that calls the Slack API and waits for a reply before continuing." },
+      { "key": "D", "text": "Replace CodePipeline with Step Functions. Use a Wait-for-Callback task with Slack interaction." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodePipeline có sẵn 2 action chuẩn cho yêu cầu này: 'CloudFormation Create Change Set' (deploymentMode = CHANGE_SET_REPLACE) và 'Manual Approval'. Manual Approval action có field 'NotificationArn' để publish lên SNS, và AWS Chatbot subscribe SNS rồi post sang Slack — zero code. B/C/D đều phải tự viết Lambda/webhook handling, tốn code hơn nhiều.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals.html"
+  },
+  {
+    "id": 227,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "multiple",
+    "question": "A company uses CodePipeline in account A to build artifacts and deploy them to accounts B and C via CloudFormation. The cross-account deployment is failing with 'Access Denied' when CodePipeline tries to upload artifacts to the S3 bucket. Which combination of configurations are REQUIRED to make cross-account artifacts work? (Choose three.)",
+    "options": [
+      { "key": "A", "text": "The artifact S3 bucket in account A must have a bucket policy granting s3:GetObject and s3:PutObject to the IAM roles in accounts B and C." },
+      { "key": "B", "text": "The artifacts must be encrypted with a customer-managed KMS key whose key policy allows access from accounts B and C." },
+      { "key": "C", "text": "The CodePipeline service role in account A must have permission to assume a role in accounts B and C." },
+      { "key": "D", "text": "Accounts B and C must be members of the same AWS Organization as account A." },
+      { "key": "E", "text": "The artifact S3 bucket must be replicated to accounts B and C using S3 Cross-Region Replication." },
+      { "key": "F", "text": "Public access must be enabled on the artifact S3 bucket." }
+    ],
+    "answer": ["A", "B", "C"],
+    "explanation": "Cross-account artifact 3 yêu cầu cốt lõi: (A) S3 bucket policy cho phép cross-account read/write, (B) artifacts BẮT BUỘC dùng CMK KMS (không dùng được SSE-S3) với key policy cross-account, (C) CodePipeline role assume role cross-account. D sai vì không cần Organization; E sai vì không cần replication; F là anti-pattern bảo mật.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-create-cross-account.html"
+  },
+  {
+    "id": 228,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A team's CodeBuild project takes 12 minutes to run because it downloads ~800 MB of npm dependencies on every build. Source code is small (~5 MB). The team wants to cut build time without changing the application code. Which approach offers the BEST improvement with minimal effort?",
+    "options": [
+      { "key": "A", "text": "Enable CodeBuild local caching with the 'LOCAL_CUSTOM_CACHE' mode and specify node_modules in the buildspec cache paths." },
+      { "key": "B", "text": "Switch to a larger compute type (BUILD_GENERAL1_LARGE) to download dependencies in parallel." },
+      { "key": "C", "text": "Use CodeBuild source caching to cache the Git source in S3." },
+      { "key": "D", "text": "Disable dependency installation and ship dependencies as a Lambda layer instead." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeBuild local cache (LOCAL_CUSTOM_CACHE) cache node_modules giữa các build trên cùng host → bỏ qua npm install nếu lock file không đổi. Cấu hình chỉ là khai báo `cache.paths` trong buildspec.yml. B (compute type lớn hơn) không giải quyết network bottleneck. C cache SOURCE không phải dependencies. D không phù hợp ứng dụng non-Lambda.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-caching.html"
+  },
+  {
+    "id": 229,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A DevOps engineer needs CodeBuild to access an RDS MySQL database in a private VPC subnet during integration tests. The build also needs to pull base images from Docker Hub. What is the CORRECT VPC configuration?",
+    "options": [
+      { "key": "A", "text": "Put CodeBuild in the same private subnet as RDS. Add a NAT Gateway in a public subnet for Docker Hub access. Grant the CodeBuild service role ec2:CreateNetworkInterface, ec2:DescribeDhcpOptions, ec2:DescribeNetworkInterfaces, ec2:DeleteNetworkInterface, ec2:DescribeSubnets, ec2:DescribeSecurityGroups, ec2:DescribeVpcs." },
+      { "key": "B", "text": "Put CodeBuild in a public subnet with an Elastic IP for Docker Hub. RDS security group allows inbound from the CodeBuild ENI." },
+      { "key": "C", "text": "Use VPC peering between CodeBuild's managed VPC and the RDS VPC." },
+      { "key": "D", "text": "Use a Transit Gateway with a Docker Hub VPC endpoint." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeBuild VPC mode chạy ENI trong private subnet bạn chỉ định. Để truy cập internet (Docker Hub) phải có NAT Gateway ở public subnet và route 0.0.0.0/0 đi qua NAT. Service role cần các ec2:* permissions để tạo/xóa ENI. B sai vì CodeBuild không support public subnet với public IP. C/D không tồn tại (CodeBuild không có managed VPC, không có Docker Hub VPC endpoint).",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html"
+  },
+  {
+    "id": 230,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A buildspec.yml references a database password stored in AWS Secrets Manager as a secret with name 'prod/db' and JSON key 'password'. The team wants the password to NOT appear in CloudWatch Logs build output. Which env_variables block achieves both injection and log masking?",
+    "options": [
+      { "key": "A", "text": "env:\n  secrets-manager:\n    DB_PASS: prod/db:password" },
+      { "key": "B", "text": "env:\n  variables:\n    DB_PASS: $(aws secretsmanager get-secret-value --secret-id prod/db --query SecretString)" },
+      { "key": "C", "text": "env:\n  parameter-store:\n    DB_PASS: prod/db" },
+      { "key": "D", "text": "env:\n  exported-variables:\n    - DB_PASS" }
+    ],
+    "answer": ["A"],
+    "explanation": "Buildspec hỗ trợ `env.secrets-manager` để inject trực tiếp từ Secrets Manager với syntax `<env_name>: <secret_id>:<json_key>`. Giá trị inject sẽ TỰ ĐỘNG bị mask trong CloudWatch Logs. B là plain variables → log không mask. C là Parameter Store (sai service). D dùng cho export biến giữa các phase.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.secrets-manager"
+  },
+  {
+    "id": 231,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "multiple",
+    "question": "A company deploys a stateless web app to an EC2 Auto Scaling Group fronted by an ALB. They want zero-downtime deployments with the ability to automatically roll back if HTTP 5xx error rate exceeds 1% during deployment. Which CodeDeploy configurations satisfy these requirements? (Choose two.)",
+    "options": [
+      { "key": "A", "text": "Use the Blue/Green deployment type with CodeDeployDefault.HalfAtATime and automatic rollback on alarm." },
+      { "key": "B", "text": "Use the Blue/Green deployment type with manual termination of the original instances after 30 minutes." },
+      { "key": "C", "text": "Configure CloudWatch alarms on ALB HTTPCode_Target_5XX_Count. Enable 'Rollback when a deployment fails' and 'Rollback when alarm thresholds are met' on the deployment group." },
+      { "key": "D", "text": "Use In-Place deployment with CodeDeployDefault.AllAtOnce." },
+      { "key": "E", "text": "Use In-Place deployment with CodeDeployDefault.OneAtATime and set a lifecycle hook to validate." }
+    ],
+    "answer": ["A", "C"],
+    "explanation": "Yêu cầu zero-downtime → cần Blue/Green (A) vì in-place luôn giảm capacity tạm thời. Automatic rollback dựa trên error rate → cần CloudWatch alarm trên 5xx và enable rollback-on-alarm (C). B sai vì manual termination không phải zero-downtime control flow. D AllAtOnce gây downtime. E in-place vẫn có downtime nhỏ, và không match yêu cầu zero-downtime.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html"
+  },
+  {
+    "id": 232,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A Lambda function is deployed with CodeDeploy using the 'Canary10Percent5Minutes' configuration. After 5 minutes, the canary still has 10% traffic. What MOST LIKELY happened?",
+    "options": [
+      { "key": "A", "text": "The BeforeAllowTraffic hook failed validation, pausing traffic shift." },
+      { "key": "B", "text": "The Canary configuration requires manual approval to proceed to 100%." },
+      { "key": "C", "text": "An automatic rollback was triggered by a CloudWatch alarm associated with the deployment group, shifting traffic back to the previous version." },
+      { "key": "D", "text": "Lambda concurrency limit was reached, preventing further traffic shift." }
+    ],
+    "answer": ["C"],
+    "explanation": "Canary10Percent5Minutes: 10% trong 5 phút, sau đó 100%. Nếu sau 5 phút vẫn 10%, deployment KHÔNG còn ở 10% — đã rollback hoặc fail. Đáp án đúng nhất là rollback do alarm: traffic về 0% trên version mới (alias trỏ lại version cũ). A sai vì BeforeAllowTraffic chạy TRƯỚC khi shift traffic. B sai vì Canary không cần manual approval. D không phải pattern điển hình.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html"
+  },
+  {
+    "id": 233,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A DevOps engineer is configuring CodeDeploy for an ECS service running on Fargate behind an ALB. The appspec.yml needs to reference which resource type?",
+    "options": [
+      { "key": "A", "text": "TaskDefinition (with ContainerName, ContainerPort, and PlatformVersion)." },
+      { "key": "B", "text": "EC2TagSet specifying the cluster tag." },
+      { "key": "C", "text": "AutoScalingGroup with the Fargate capacity provider." },
+      { "key": "D", "text": "LambdaAlias with traffic shifting config." }
+    ],
+    "answer": ["A"],
+    "explanation": "Appspec cho ECS deployment có Resources: TaskDefinition (ARN của task def mới) + LoadBalancerInfo (ContainerName, ContainerPort) + PlatformVersion (cho Fargate). B chỉ áp dụng EC2/On-prem in-place. C không hợp lý vì Fargate không dùng ASG. D dành cho Lambda deployment.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure.html"
+  },
+  {
+    "id": 234,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "After a CodeDeploy in-place deployment to a 10-instance ASG fails on instance 6 (AllAtOnce), the deployment status shows 'Failed'. The application is now in a mixed state. What does CodeDeploy do by default with the 'Roll back when a deployment fails' option enabled?",
+    "options": [
+      { "key": "A", "text": "It creates a NEW deployment that re-installs the PREVIOUS application revision to all instances in the deployment group." },
+      { "key": "B", "text": "It uses snapshots to restore EBS volumes to pre-deployment state." },
+      { "key": "C", "text": "It terminates the failed instances and lets the ASG replace them." },
+      { "key": "D", "text": "It marks the deployment as 'Rolled back' but leaves instances in the mixed state for manual remediation." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeDeploy rollback KHÔNG phải undo — nó tạo deployment MỚI deploy lại revision trước đó. Tốn time + appspec hooks phải idempotent. B không phải behavior CodeDeploy. C là ASG self-healing chứ không phải rollback. D mâu thuẫn với option đã enable.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html"
+  },
+  {
+    "id": 235,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "multiple",
+    "question": "A company runs multiple microservices on ECS. They want to standardize CI/CD across all services using CodePipeline. Common requirements: artifacts in central account, deployments fan out to multiple target accounts, audit log of every deployment, and rollback button. Which combination of services provides this with the LEAST operational overhead? (Choose two.)",
+    "options": [
+      { "key": "A", "text": "Use a single CodePipeline per service in the central account with cross-account CodeDeploy actions to target accounts. Enable EventBridge to capture pipeline state changes to a central CloudWatch Log group." },
+      { "key": "B", "text": "Use CodeStar Connections with GitHub as source, CodeBuild for image build, and Amazon ECR replication for cross-account image distribution." },
+      { "key": "C", "text": "Run Jenkins on EC2 in each target account; sync pipelines via Git." },
+      { "key": "D", "text": "Use AWS Proton with self-managed templates for every service." },
+      { "key": "E", "text": "Use AWS Service Catalog products for each service and let users self-deploy." }
+    ],
+    "answer": ["A", "B"],
+    "explanation": "A: CodePipeline ở central account với cross-account CodeDeploy + EventBridge audit là pattern AWS recommend, ít overhead. B: CodeStar Connections (GitHub) + ECR replication tự động distribute image cross-account → không phải push lặp lại. C: Jenkins per account = nhiều overhead. D: Proton phù hợp template-driven app nhưng heavy cho microservices đơn giản. E: Service Catalog dành cho infra products không phải CI/CD.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-account.html"
+  },
+  {
+    "id": 236,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A CodePipeline pipeline uses a CloudFormation deploy action with 'CREATE_UPDATE' deployment mode. The stack update fails halfway through and is left in UPDATE_ROLLBACK_FAILED state. The pipeline subsequent runs all fail at the deploy action. What is the BEST way to recover?",
+    "options": [
+      { "key": "A", "text": "Use the CloudFormation 'continue-update-rollback' action with --resources-to-skip pointing to the failed resource, then re-trigger the pipeline." },
+      { "key": "B", "text": "Delete the stack and recreate it via the pipeline's CHANGE_SET_REPLACE mode." },
+      { "key": "C", "text": "Manually edit the stack template in the AWS Console to remove the failed resource." },
+      { "key": "D", "text": "Increase the CodePipeline action timeout." }
+    ],
+    "answer": ["A"],
+    "explanation": "UPDATE_ROLLBACK_FAILED là deadlock state. Cách thoát chuẩn: `continue-update-rollback --resources-to-skip` để skip resource bị treo → stack về UPDATE_ROLLBACK_COMPLETE, sẵn sàng cho update mới. B (delete+recreate) gây mất resources, là last resort. C không thể edit stack qua console khi state này. D không liên quan.",
+    "reference": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-continueupdaterollback.html"
+  },
+  {
+    "id": 237,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A team wants to trigger a CodePipeline run automatically whenever a Git tag matching the pattern 'release-*' is pushed to their CodeCommit repo. They do NOT want runs triggered on regular commits to any branch. What is the MOST appropriate trigger configuration?",
+    "options": [
+      { "key": "A", "text": "Create an EventBridge rule matching CodeCommit 'referenceCreated' events where 'referenceType' is 'tag' and 'referenceName' starts with 'release-'. Target: StartPipelineExecution on the pipeline." },
+      { "key": "B", "text": "Enable the default CodeCommit source action polling and add a Lambda filter that aborts the pipeline if the branch is not a tag." },
+      { "key": "C", "text": "Add a CodeBuild pre-step that runs 'git describe' and exits early unless a release tag is present." },
+      { "key": "D", "text": "Configure a CloudWatch Logs metric filter on CodeCommit API logs for 'CreateBranch' events." }
+    ],
+    "answer": ["A"],
+    "explanation": "EventBridge với detail-type 'CodeCommit Repository State Change' filter trên referenceType=tag và referenceName pattern là cách native, không cần code. B tốn run lãng phí. C tốn build minute và không reliable. D nhầm CreateBranch và không lọc được tag.",
+    "reference": "https://docs.aws.amazon.com/codecommit/latest/userguide/monitoring-events.html"
+  },
+  {
+    "id": 238,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A buildspec.yml uses `phases.install`, `phases.pre_build`, `phases.build`, and `phases.post_build`. The 'build' phase fails. What does CodeBuild do?",
+    "options": [
+      { "key": "A", "text": "Skips remaining build commands but STILL runs 'post_build' phase. Marks the overall build as FAILED." },
+      { "key": "B", "text": "Stops immediately and skips 'post_build'. Marks the build FAILED." },
+      { "key": "C", "text": "Retries 'build' phase up to 3 times before failing." },
+      { "key": "D", "text": "Continues to 'post_build' and marks the build SUCCEEDED if post_build passes." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeBuild luôn chạy post_build dù build phase fail — để bạn có thể upload reports, gửi notification, cleanup. Tuy nhiên overall status = FAILED. Lưu ý: `$CODEBUILD_BUILD_SUCCEEDING` env var = 0 trong post_build nếu build failed, dùng để branch logic. B/C/D đều sai về behavior thực tế.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/view-build-details.html#view-build-details-phases"
+  },
+  {
+    "id": 239,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A company uses CodeArtifact for npm packages. Their CodeBuild builds run `npm install` against an internal CodeArtifact repository that has an upstream of the public npm registry. A new build fails with 'No package found' for a package that exists publicly. Most likely cause?",
+    "options": [
+      { "key": "A", "text": "The package was never requested before, so CodeArtifact's lazy upstream fetch hasn't ingested it. The user must run a one-time fetch (e.g., via `aws codeartifact get-package-version-asset`) or grant the build role permission to read external connections." },
+      { "key": "B", "text": "CodeArtifact does not support npm packages." },
+      { "key": "C", "text": "The CodeBuild env is missing AWS_REGION environment variable." },
+      { "key": "D", "text": "CodeArtifact requires the package to be republished as a CodeArtifact-native package, not fetched from upstream." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeArtifact upstream ingest LAZY — package công cộng chỉ được pull khi consumer yêu cầu và build role có permission `codeartifact:ReadFromRepository` + external connection access. Nếu role thiếu quyền 'access external repository' thì sẽ ra lỗi 'no package found'. B sai (npm fully supported). D sai về cơ chế upstream.",
+    "reference": "https://docs.aws.amazon.com/codeartifact/latest/ug/external-connection.html"
+  },
+  {
+    "id": 240,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "An Elastic Beanstalk environment running a Node.js app needs zero-downtime deployments AND the ability to test the new version in production with real traffic before fully cutting over. Which deployment policy fits BEST?",
+    "options": [
+      { "key": "A", "text": "Traffic Splitting (canary)" },
+      { "key": "B", "text": "All-at-once" },
+      { "key": "C", "text": "Rolling" },
+      { "key": "D", "text": "Rolling with additional batch" }
+    ],
+    "answer": ["A"],
+    "explanation": "Traffic Splitting trong EB tạo ASG mới với version mới, route % traffic configurable trong khoảng thời gian — đúng nghĩa canary. All-at-once gây downtime. Rolling thay thế tuần tự nhưng không phân chia % traffic. Rolling with additional batch giữ capacity nhưng vẫn không phải canary thực sự. Immutable là zero-downtime nhưng cũng không split traffic.",
+    "reference": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html"
+  },
+  {
+    "id": 241,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A team wants `.ebextensions` to install a package from yum every time a new instance launches in their EB environment. Which configuration is CORRECT?",
+    "options": [
+      { "key": "A", "text": "Create `.ebextensions/install.config` with key `packages:` then `yum:` mapping package names to versions or empty strings." },
+      { "key": "B", "text": "Add `apt-get install` commands to `.platform/hooks/predeploy/01_install.sh`." },
+      { "key": "C", "text": "Place a Dockerfile RUN directive at the root of the source bundle." },
+      { "key": "D", "text": "Set an environment variable EB_INSTALL_PACKAGES with comma-separated package names." }
+    ],
+    "answer": ["A"],
+    "explanation": "`.ebextensions/*.config` (YAML) hỗ trợ key `packages.yum` (Amazon Linux), `packages.rpm`, `packages.python`. Đây là cách chuẩn cài package qua EB. B dùng cho Amazon Linux 2 platform hooks (cách mới hơn nhưng dùng `.platform/hooks/` đúng, không phải `apt-get` trên AL2). C chỉ áp dụng Docker platform. D không tồn tại.",
+    "reference": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/customize-containers-ec2.html"
+  },
+  {
+    "id": 242,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "multiple",
+    "question": "A DevOps engineer needs to enforce that every pull request in CodeCommit must be approved by at least 2 senior engineers before merging to the main branch. Which configurations are NEEDED? (Choose two.)",
+    "options": [
+      { "key": "A", "text": "Create an Approval Rule Template specifying number of approvals = 2 and an approval pool of senior engineer IAM principals." },
+      { "key": "B", "text": "Associate the Approval Rule Template with the target repository (or branch via branch filter)." },
+      { "key": "C", "text": "Enable repository-level encryption with a customer-managed KMS key." },
+      { "key": "D", "text": "Configure a Lambda trigger on PullRequestStateChanged events to count approvals." },
+      { "key": "E", "text": "Grant senior engineers the AWSCodeCommitFullAccess managed policy." }
+    ],
+    "answer": ["A", "B"],
+    "explanation": "CodeCommit Approval Rule Templates là feature native: (A) tạo template với rules (number of approvals, approval pool), (B) associate với repo/branch. Không cần code. C không liên quan approval flow. D là cách thủ công không cần thiết. E quyền quá rộng.",
+    "reference": "https://docs.aws.amazon.com/codecommit/latest/userguide/approval-rule-templates.html"
+  },
+  {
+    "id": 243,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A CodeDeploy deployment to EC2 uses a Lifecycle hook 'BeforeAllowTraffic' that runs a smoke test script. The script makes an HTTPS call to https://app.internal/health which is the application running locally on the instance via ALB target group. The script consistently times out. What is the MOST LIKELY issue?",
+    "options": [
+      { "key": "A", "text": "BeforeAllowTraffic runs BEFORE traffic is registered with the target group, so the ALB does not route to the new task set/instance yet. Script should call localhost directly or use AfterAllowTraffic." },
+      { "key": "B", "text": "Lifecycle hooks have a hard 30-second timeout that cannot be extended." },
+      { "key": "C", "text": "BeforeAllowTraffic does not have IAM permissions to call HTTPS endpoints." },
+      { "key": "D", "text": "The ALB security group blocks outbound HTTPS from EC2 instances." }
+    ],
+    "answer": ["A"],
+    "explanation": "BeforeAllowTraffic chạy SAU khi cài app nhưng TRƯỚC khi register instance vào target group, nên ALB chưa biết instance này tồn tại → call qua ALB sẽ timeout/route đến instance khác. Smoke test giai đoạn này nên gọi localhost. AfterAllowTraffic mới đúng để test qua ALB. B sai (timeout configurable). C sai (lifecycle hook scripts chạy với IAM role của instance).",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html"
+  },
+  {
+    "id": 244,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A company wants their CodePipeline to fail if a SonarQube quality gate fails. SonarQube runs as part of a CodeBuild project. The build commands report success even when SonarQube quality gate fails because the SonarQube scanner exits 0. How can the team make the build (and pipeline) fail on gate failure with the LEAST custom code?",
+    "options": [
+      { "key": "A", "text": "Add a buildspec post_build command that calls SonarQube's `qualitygates/project_status` API and exits non-zero if status != 'OK'." },
+      { "key": "B", "text": "Configure CodeBuild Report Group with SonarQube format and use 'block deployment on failed report' setting." },
+      { "key": "C", "text": "Use CodeGuru Reviewer instead of SonarQube." },
+      { "key": "D", "text": "Add a CodePipeline manual approval step that requires QA to verify SonarQube before allowing the deploy stage." }
+    ],
+    "answer": ["A"],
+    "explanation": "Pattern chuẩn: gọi API quality gate sau khi scanner xong, exit non-zero nếu fail. B không tồn tại — CodeBuild Report Groups hiện hỗ trợ JUnit, Cucumber, TestNG, NUnit, không có SonarQube native; cũng không có 'block deployment on failed report' setting tự động. C đổi sang công nghệ khác không match yêu cầu. D thêm manual gate, không tự động.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html"
+  },
+  {
+    "id": 245,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A serverless application is deployed via SAM CLI to multiple regions. The team wants `sam deploy` in CodePipeline to deploy to us-east-1, us-west-2, and eu-west-1 in parallel, with the pipeline failing if ANY region fails. What is the SIMPLEST way to achieve this?",
+    "options": [
+      { "key": "A", "text": "Create a single CodePipeline stage with three CodeBuild actions in parallel, each running `sam deploy` against one region. Set action runOrder to the same number so they execute concurrently." },
+      { "key": "B", "text": "Create three separate pipelines and chain them with EventBridge rules." },
+      { "key": "C", "text": "Use CloudFormation StackSets with target = three regions; one CodePipeline action triggers the StackSet operation." },
+      { "key": "D", "text": "Run `sam deploy` sequentially for each region in a single CodeBuild project." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodePipeline cùng `runOrder` = parallel actions trong cùng stage. Stage fail nếu bất kỳ action fail. Đây là cách native, ít code nhất. B chained pipelines = sequential, không parallel. C StackSets phù hợp CloudFormation thuần, không phải SAM (mặc dù SAM transform thành CFN nhưng `sam deploy` không gọi StackSets). D sequential không match yêu cầu parallel.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html"
+  },
+  {
+    "id": 246,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A team uses CodeDeploy with EC2 tag-based deployment groups. They tag instances with Environment=staging and Environment=prod. A deployment intended for staging accidentally targeted prod when an engineer typed the wrong tag value. What CodeDeploy feature would have PREVENTED this with the LEAST code?",
+    "options": [
+      { "key": "A", "text": "Use deployment configurations with stricter minimum healthy hosts." },
+      { "key": "B", "text": "Use a CodeDeploy 'deployment-group-trigger' to SNS for prior notification." },
+      { "key": "C", "text": "Configure separate IAM roles per environment and rely on IAM policy conditions; use distinct CodeDeploy applications per environment rather than per-deployment-group tag matching." },
+      { "key": "D", "text": "Enable CloudTrail data events on CodeDeploy." }
+    ],
+    "answer": ["C"],
+    "explanation": "Root cause: tag-based deployment group too flexible — typing wrong tag value silently targets wrong fleet. Best practice: tách environments thành CodeDeploy applications/groups RIÊNG BIỆT + IAM policy chỉ cho phép role nào được deploy app nào (deny by default). A không liên quan target selection. B notify post-facto, không prevent. D audit log không prevent.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-tagging.html"
+  },
+  {
+    "id": 247,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A company's CodePipeline ingests source from S3. The S3 bucket has versioning enabled. The team notices the pipeline does not auto-trigger when a new ZIP is uploaded. What is the LIKELY cause?",
+    "options": [
+      { "key": "A", "text": "CloudTrail data events for the S3 object are not enabled, and the pipeline source action is set to 'detect changes via CloudWatch Events' which requires CloudTrail." },
+      { "key": "B", "text": "S3 source actions do not support auto-trigger; only CodeCommit and GitHub do." },
+      { "key": "C", "text": "Versioning interferes with pipeline detection." },
+      { "key": "D", "text": "The bucket must be in the same region as the pipeline." }
+    ],
+    "answer": ["A"],
+    "explanation": "S3 source auto-trigger qua EventBridge yêu cầu CloudTrail data events được enable cho bucket+object — EventBridge listen 'PutObject' API calls. Nếu source action `DetectChanges = true` nhưng CloudTrail data events tắt thì pipeline không trigger. B sai (S3 auto-trigger được support). C/D không phải nguyên nhân.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/create-cloudtrail-S3-source.html"
+  },
+  {
+    "id": 248,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "An ECS service uses CodeDeploy blue/green with ALB listener routing. Mid-deployment, the engineer realizes they want to abort and revert to blue. What is the CORRECT action?",
+    "options": [
+      { "key": "A", "text": "Stop the deployment in the CodeDeploy console with 'Stop and rollback deployment'. CodeDeploy reverts the listener to the blue target group and terminates the green task set." },
+      { "key": "B", "text": "Delete the green ECS task set manually." },
+      { "key": "C", "text": "Modify the ALB listener rule manually to point to blue, then let CodeDeploy time out." },
+      { "key": "D", "text": "Update the CloudFormation stack to remove the new task definition." }
+    ],
+    "answer": ["A"],
+    "explanation": "CodeDeploy có operation 'Stop and rollback deployment' chuyên cho case này — listener về blue, green task set bị terminate gracefully. B/C/D đều bypass CodeDeploy → deployment state inconsistent, có thể block future deployments.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-stop.html"
+  },
+  {
+    "id": 249,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A buildspec.yml uses `artifacts.secondary-artifacts` to produce two artifact bundles for two downstream pipeline actions. The pipeline source action's output is named 'SourceArtifact'. The build action declares output artifacts 'ArtifactA' and 'ArtifactB'. How should the downstream deploy actions reference each artifact?",
+    "options": [
+      { "key": "A", "text": "Each downstream action's `InputArtifacts` field references either 'ArtifactA' or 'ArtifactB' by name; CodePipeline routes the corresponding secondary artifact." },
+      { "key": "B", "text": "Both downstream actions read 'SourceArtifact' and use a path prefix inside the bundle." },
+      { "key": "C", "text": "Secondary artifacts can only be consumed by Lambda invoke actions, not deploy actions." },
+      { "key": "D", "text": "The build phase must zip both secondary artifacts together into one named 'CombinedArtifact'." }
+    ],
+    "answer": ["A"],
+    "explanation": "Secondary artifacts được declare trong buildspec dưới `artifacts.secondary-artifacts` và mỗi cái có identifier. Trong CodePipeline, build action output có nhiều artifacts cùng tên với identifier; downstream action reference đúng tên là routes đúng. B/C/D đều không phải behavior chuẩn.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/sample-multi-in-out.html"
+  },
+  {
+    "id": 250,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A team uses CodePipeline with a CloudFormation deploy action in `CREATE_UPDATE` mode. They want the action to FAIL if the change set would replace (cause downtime to) any RDS DB instance. Which configuration achieves this WITHOUT custom Lambda?",
+    "options": [
+      { "key": "A", "text": "Use deployment mode `CHANGE_SET_REPLACE` + manual approval action that requires reviewer to inspect the change set summary before `CHANGE_SET_EXECUTE`." },
+      { "key": "B", "text": "Enable CloudFormation Drift Detection on the stack." },
+      { "key": "C", "text": "Use CloudFormation StackSets instead." },
+      { "key": "D", "text": "Set `OnFailure: ROLLBACK` in the stack policy." }
+    ],
+    "answer": ["A"],
+    "explanation": "Pattern: tách thành 2 step — CHANGE_SET_REPLACE tạo change set (không apply), Manual Approval cho reviewer nhìn 'Replace' action trong change set summary, sau đó CHANGE_SET_EXECUTE. Không cần Lambda. B Drift Detection chỉ phát hiện thay đổi out-of-band sau khi đã apply. C/D không liên quan.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CloudFormation.html"
+  },
+  {
+    "id": 251,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A DevOps engineer wants CodeBuild to fail builds whose Docker image scan reports HIGH or CRITICAL CVEs. The image is pushed to ECR. What is the MOST integrated approach?",
+    "options": [
+      { "key": "A", "text": "Push the image to ECR with scan-on-push enabled. In post_build, call `aws ecr describe-image-scan-findings` and exit non-zero if HIGH/CRITICAL count > 0." },
+      { "key": "B", "text": "Run `docker scan` (Snyk) locally in the build container with a custom CVE policy file." },
+      { "key": "C", "text": "Use Amazon Inspector on the running ECS tasks and fail the build if vulnerabilities reported." },
+      { "key": "D", "text": "Pull a public CVE feed and grep the Dockerfile." }
+    ],
+    "answer": ["A"],
+    "explanation": "ECR Enhanced Scanning (powered by Inspector) hoặc Basic Scanning với scan-on-push: image scan chạy ngay sau push. CodeBuild call describe-image-scan-findings, lọc severity. Đây là pattern AWS-native, ít overhead. B Snyk free tier giới hạn. C Inspector ECS scan sau khi đã deploy, quá muộn để block build. D không khả thi.",
+    "reference": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html"
+  },
+  {
+    "id": 252,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A monorepo contains 10 services. The team wants CodePipeline to trigger ONLY the affected service's pipeline when a commit touches files under that service's directory. Which approach is MOST scalable?",
+    "options": [
+      { "key": "A", "text": "Use a single 'detection' Lambda triggered by CodeCommit referenceUpdated. Lambda diffs files in the commit and starts the appropriate downstream pipelines via StartPipelineExecution." },
+      { "key": "B", "text": "Configure 10 EventBridge rules with file-path filtering on CodeCommit events." },
+      { "key": "C", "text": "Use 10 CodePipeline source actions each with a different branch filter." },
+      { "key": "D", "text": "Split the monorepo into 10 separate repos." }
+    ],
+    "answer": ["A"],
+    "explanation": "EventBridge KHÔNG match được trên file paths bên trong commit — chỉ match metadata (repo, branch, ref). Pattern chuẩn cho monorepo: detection Lambda diff git và start pipeline tương ứng. B impossible. C branch filter không tách theo file path. D đi ngược triết lý monorepo.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/triggering.html"
+  },
+  {
+    "id": 253,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "multiple",
+    "question": "A pipeline deploys to production and uses a manual approval action. The team wants to ensure that ONLY members of the 'release-managers' IAM group can approve. Which controls are EFFECTIVE? (Choose two.)",
+    "options": [
+      { "key": "A", "text": "Attach an IAM policy to 'release-managers' allowing codepipeline:PutApprovalResult on the specific pipeline ARN, and deny it for everyone else." },
+      { "key": "B", "text": "Configure the manual approval action with an SNS topic that has a subscription filter restricting subscribers to release-managers." },
+      { "key": "C", "text": "Use a permission boundary on the approval IAM role that includes a Condition on aws:PrincipalArn." },
+      { "key": "D", "text": "Enable MFA on all IAM users in the account." },
+      { "key": "E", "text": "Encrypt the approval action with a customer-managed KMS key." }
+    ],
+    "answer": ["A", "C"],
+    "explanation": "Control approval = control quyền `codepipeline:PutApprovalResult` trên pipeline ARN (A) + có thể chặt hơn nữa với permission boundary/Condition (C). B SNS subscription filter không kiểm soát ai click approve trong console. D MFA tốt cho security tổng quát nhưng không nhắm cụ thể approval. E encryption không liên quan authz.",
+    "reference": "https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals-iam-permissions.html"
+  },
+  {
+    "id": 254,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A CodeBuild project needs to run as part of a CodePipeline pipeline AND occasionally be triggered standalone for ad-hoc testing. The buildspec uses environment variables passed by the pipeline. When run standalone, the variables are undefined. What is the BEST practice?",
+    "options": [
+      { "key": "A", "text": "Define default values for all required env vars in the buildspec `env.variables` section so standalone runs work with sane defaults, while pipeline runs override them via the action's `EnvironmentVariables` overrides." },
+      { "key": "B", "text": "Keep two separate CodeBuild projects — one for pipeline, one for standalone." },
+      { "key": "C", "text": "Always set env vars at the project level (not action level) so they persist across both modes." },
+      { "key": "D", "text": "Use AWS Secrets Manager for all env vars to ensure consistency." }
+    ],
+    "answer": ["A"],
+    "explanation": "Pattern best practice: defaults trong buildspec + override từ pipeline action. Giữ DRY (1 project, 1 buildspec) đồng thời support cả 2 mode. B duplicate code. C project-level vars không thể khác giữa pipeline contexts. D Secrets Manager dùng cho secrets không phải mọi env var.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html"
+  },
+  {
+    "id": 255,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A blue/green deployment for ECS via CodeDeploy is configured with `Linear10PercentEvery1Minutes`. After the deployment reaches 100% green, the team wants to terminate the original (blue) task set. What is the default behavior?",
+    "options": [
+      { "key": "A", "text": "CodeDeploy waits the duration configured in `terminationWaitTimeInMinutes` (default 0 if not set explicitly), then terminates the blue task set automatically." },
+      { "key": "B", "text": "CodeDeploy keeps the blue task set running indefinitely until manually terminated." },
+      { "key": "C", "text": "ECS auto-scales the blue task set to 0 immediately at 100% green." },
+      { "key": "D", "text": "Both task sets continue serving 50/50 traffic." }
+    ],
+    "answer": ["A"],
+    "explanation": "Deployment group cho ECS có setting `Blue/Green deployment configuration > Original revision termination` với `terminationWaitTimeInMinutes` (0-2880). Hết khoảng đó CodeDeploy tự terminate blue. Mặc định AWS console là 1 hour. B/C/D đều sai về behavior.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html"
+  },
+  {
+    "id": 256,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A buildspec for a Python project runs `pytest` and generates JUnit XML at `reports/junit.xml`. The team wants the test results to be visible in the CodeBuild console as a Report. Which buildspec section is correct?",
+    "options": [
+      { "key": "A", "text": "reports:\n  pytest-reports:\n    files:\n      - 'reports/junit.xml'\n    file-format: 'JUNITXML'" },
+      { "key": "B", "text": "artifacts:\n  type: 'JUNIT'\n  base-directory: 'reports'" },
+      { "key": "C", "text": "test-reports:\n  format: junit\n  path: reports/junit.xml" },
+      { "key": "D", "text": "phases:\n  post_build:\n    commands:\n      - aws codebuild update-report --format junit --files reports/junit.xml" }
+    ],
+    "answer": ["A"],
+    "explanation": "Buildspec section `reports.<report-group-name>` với `files` + `file-format` (JUNITXML, CUCUMBERJSON, NUNITXML, NUNIT3XML, TESTNGXML, VISUALSTUDIOTRX). CodeBuild tự parse và hiển thị trong Reports tab. B nhầm với artifacts. C cú pháp không tồn tại. D không phải pattern hỗ trợ.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-report-group.html"
+  },
+  {
+    "id": 257,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "Engineers complain that pulling Docker images from Docker Hub during CodeBuild causes rate-limit errors. Builds run hundreds of times per day. Which solution PERMANENTLY fixes this with minimum cost?",
+    "options": [
+      { "key": "A", "text": "Mirror frequently-used Docker Hub images to a private ECR repository. Update buildspec to pull from ECR instead." },
+      { "key": "B", "text": "Pay for Docker Hub Pro license and configure CodeBuild to authenticate with credentials in Secrets Manager." },
+      { "key": "C", "text": "Increase CodeBuild concurrent build limit to avoid rate limiting." },
+      { "key": "D", "text": "Run all builds in a single CodeBuild project to share rate-limit allocation." }
+    ],
+    "answer": ["A"],
+    "explanation": "ECR private mirror = không còn pull Docker Hub trong build → vĩnh viễn hết rate limit, latency thấp hơn, cost rất nhỏ (storage). B vẫn dùng Docker Hub, tốn license phí. C concurrent limit không liên quan rate limit Docker Hub (rate limit là per source IP). D ngược lại — rate limit per IP nên gộp cũng không giải quyết.",
+    "reference": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html"
+  },
+  {
+    "id": 258,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "An engineer notices that CodeDeploy's `BeforeInstall` hook script runs BEFORE the new revision files are downloaded. They want a hook that runs AFTER files are copied but BEFORE the application starts. Which hook is appropriate?",
+    "options": [
+      { "key": "A", "text": "AfterInstall" },
+      { "key": "B", "text": "ApplicationStart" },
+      { "key": "C", "text": "ValidateService" },
+      { "key": "D", "text": "DownloadBundle" }
+    ],
+    "answer": ["A"],
+    "explanation": "Lifecycle order (EC2/On-prem): ApplicationStop → DownloadBundle → BeforeInstall → Install → **AfterInstall** → ApplicationStart → ValidateService. AfterInstall đúng vị trí: files đã copy, app chưa start. BeforeInstall chạy TRƯỚC Install (đối lập với mô tả). B ApplicationStart là sự kiện start app. C ValidateService sau khi app start. D DownloadBundle không user-scriptable.",
+    "reference": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html"
+  },
+  {
+    "id": 259,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A serverless app uses SAM. The DevOps team wants to enable gradual deployment with automatic rollback if any Lambda function reports errors during the canary window. Which SAM construct provides this with the LEAST configuration?",
+    "options": [
+      { "key": "A", "text": "Set `AutoPublishAlias: live` and `DeploymentPreference: { Type: Canary10Percent5Minutes, Alarms: [!Ref ErrorAlarm] }` on the AWS::Serverless::Function resource." },
+      { "key": "B", "text": "Manually create CodeDeploy application + deployment group + alias + version mapping in a separate CloudFormation stack." },
+      { "key": "C", "text": "Use Step Functions to orchestrate Lambda alias updates and check CloudWatch metrics." },
+      { "key": "D", "text": "Deploy two Lambda functions (v1 and v2) and use API Gateway stage variables to switch." }
+    ],
+    "answer": ["A"],
+    "explanation": "SAM `DeploymentPreference` tự sinh CodeDeploy app + deployment group + alias + hooks. Add `Alarms` để rollback nếu trigger trong canary window. Đây là cách integrated nhất, gần như zero boilerplate. B reinvents what SAM provides. C/D over-engineered.",
+    "reference": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/automating-updates-to-serverless-apps.html"
+  },
+  {
+    "id": 260,
+    "domain": "SDLC Automation",
+    "domainCode": "D1",
+    "type": "single",
+    "question": "A CodeBuild project times out at the default 60 minutes during integration tests. Tests legitimately need 90 minutes. What is the CORRECT change?",
+    "options": [
+      { "key": "A", "text": "Increase the build timeout in the CodeBuild project settings (max 8 hours)." },
+      { "key": "B", "text": "Set buildspec `timeoutInMinutes: 90` — this overrides the project setting." },
+      { "key": "C", "text": "Add `&& sleep 30` to keep the build alive longer." },
+      { "key": "D", "text": "Split into two CodeBuild projects, each running half the tests." }
+    ],
+    "answer": ["A"],
+    "explanation": "Build timeout là project-level setting (5 min - 8 hours), default 60. Tăng lên 90 (hoặc cao hơn) là cách chuẩn. B sai vì buildspec không có field `timeoutInMinutes`. C anti-pattern không giải quyết. D unnecessary complexity.",
+    "reference": "https://docs.aws.amazon.com/codebuild/latest/userguide/change-project.html"
+  }
+]
